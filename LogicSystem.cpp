@@ -20,9 +20,19 @@ LogicSystem::LogicSystem()
 		if (reader.parse(json_str, json_value))
 		{
 			Json::Value re;
-			re["email"]=json_value["email"];
-			re["error"]=ErrorCodes::Success;
+			std::cout<<"email\n"<<json_value["email"].asString()<<std::endl;
+			message::GetVerifyRsp reply = VerifyGrpcClient::GetInstance()->GetVerifyCode(json_value["email"].asString());
+			std::cout<<"error:"<<reply.error()<<"email:"<<reply.email()<<"code:"<<reply.code()<<std::endl;
+			if (reply.error() == ErrorCodes::RPCFailed)
+			{
+				re["error"]=ErrorCodes::RPCFailed;
+			}
+			else
+			{
+				re["error"] = ErrorCodes::Success;
+			}
 			boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+
 			return true;
 		}
 		else

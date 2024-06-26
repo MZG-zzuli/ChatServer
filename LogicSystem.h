@@ -8,7 +8,8 @@ class HttpConnection;
 #include<json/reader.h>
 #include"const.h"
 #include<boost/beast.hpp>
-
+#include"message.pb.h"
+#include"VerifyGrpcClient.h"
 
 typedef std::function<void(std::shared_ptr<HttpConnection>)> HttpHandler;
 class LogicSystem:public Singleton<LogicSystem>
