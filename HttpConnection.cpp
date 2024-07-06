@@ -1,13 +1,17 @@
 #include "HttpConnection.h"
 
-HttpConnection::HttpConnection(boost::asio::ip::tcp::socket& sock) :_sock(std::move(sock))
+HttpConnection::HttpConnection(boost::asio::io_context& ioc) :_sock(ioc)
 {
-	
 }
 
 HttpConnection::~HttpConnection()
 {
 	std::cout<<"HttpConnection::~HttpConnection()"<<std::endl;
+}
+
+boost::asio::ip::tcp::socket& HttpConnection::getSocket()
+{
+	return _sock;
 }
 
 void HttpConnection::start()

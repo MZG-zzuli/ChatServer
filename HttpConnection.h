@@ -11,8 +11,9 @@ class HttpConnection:public std::enable_shared_from_this<HttpConnection>
 {
 	friend class LogicSystem;
 public:
-	HttpConnection(boost::asio::ip::tcp::socket& sock);
+	HttpConnection(boost::asio::io_context& ioc);
 	~HttpConnection();
+	boost::asio::ip::tcp::socket& getSocket();
 	void start();
 
 private:

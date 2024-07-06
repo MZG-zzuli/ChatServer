@@ -3,6 +3,7 @@
 #include<boost/asio.hpp>
 #include<memory>
 #include<iostream>
+#include"AsioIOServicePool.h"
 class HttpConnection;
 #include"HttpConnection.h"
 class CServer:public std::enable_shared_from_this<CServer>

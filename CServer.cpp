@@ -8,8 +8,8 @@ CServer::CServer(boost::asio::io_context& ioc, int port):_ioc(ioc),_accept(ioc,b
 void CServer::start()
 {
 	std::shared_ptr<CServer> self = shared_from_this();
-
-	_accept.async_accept(_sock, [self](boost::system::error_code ec) {
+	std::shared_ptr<HttpConnection> conn=std::make_shared<HttpConnection>(AsioIOServicePool::GetInstance()->getIOService());
+	_accept.async_accept(conn->getSocket(), [self,conn](boost::system::error_code ec) {
 		try {
 			if (ec)
 			{
@@ -17,7 +17,7 @@ void CServer::start()
 				self->start();
 				return;
 			}
-			std::make_shared<HttpConnection>(self->_sock)->start();
+			conn->start();
 			self->start();
 
 		}

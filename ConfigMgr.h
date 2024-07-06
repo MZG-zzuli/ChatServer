@@ -36,7 +36,7 @@ class ConfigMgr
 {
 public:
 	
-	ConfigMgr();
+
 	~ConfigMgr() {}
 	SectionInfo operator[](const std::string& section)
 	{
@@ -58,10 +58,11 @@ public:
 	{
 		this->_config_map = other._config_map;
 	}
+	static ConfigMgr& Inst();
 
 
 private:
 	std::map<std::string, SectionInfo> _config_map;
-
+	ConfigMgr();
 };
 
