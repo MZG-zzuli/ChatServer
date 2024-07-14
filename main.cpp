@@ -10,6 +10,8 @@
 #include<hiredis/hiredis.h>
 #include"RedisMgr.h"
 #include<assert.h>
+#include"MysqlDao.h"
+#include"MysqlMgr.h"
 void TestRedisMgr() {
 
     assert(RedisMgr::GetInstance()->Auth("123456"));
@@ -34,15 +36,19 @@ void TestRedisMgr() {
 }
 int main()
 {
-
-    TestRedisMgr();
+    std::string s;
+    RedisMgr::GetInstance()->Get("code_208474482@qq.com", s);
+    std::cout << s << std::endl;
+    std::cout << "--------------\n";
+    //TestRedisMgr();
+    
     
 	std::cout << ConfigMgr::Inst()["GateServer"]["port"];
 	boost::asio::io_context io_context;
 
 	std::make_shared<CServer>(io_context, stoi(ConfigMgr::Inst()["GateServer"]["port"]))->start();
-	io_context.run();
 	std::cout << "GateServer start" << std::endl;
+	io_context.run();
 	return 0;
 }
 

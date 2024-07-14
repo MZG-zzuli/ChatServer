@@ -10,8 +10,9 @@ class HttpConnection;
 #include<boost/beast.hpp>
 #include"message.pb.h"
 #include"VerifyGrpcClient.h"
-
-typedef std::function<void(std::shared_ptr<HttpConnection>)> HttpHandler;
+#include"MysqlMgr.h"
+#include"RedisMgr.h"
+typedef std::function<bool(std::shared_ptr<HttpConnection>)> HttpHandler;
 class LogicSystem:public Singleton<LogicSystem>
 {
 	friend class Singleton<LogicSystem>;
@@ -23,6 +24,10 @@ public:
 	void RegPost(std::string url, HttpHandler handler);
 private:
 	LogicSystem();
+
+	bool test(std::shared_ptr<HttpConnection> connection);
+	bool get_verifycode(std::shared_ptr<HttpConnection> connection);
+	bool user_register(std::shared_ptr<HttpConnection> connection);
 	std::map<std::string,HttpHandler> _post_handlers;
 	std::map<std::string,HttpHandler> _get_handlers;
 
