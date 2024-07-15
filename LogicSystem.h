@@ -28,6 +28,7 @@ private:
 	bool test(std::shared_ptr<HttpConnection> connection);
 	bool get_verifycode(std::shared_ptr<HttpConnection> connection);
 	bool user_register(std::shared_ptr<HttpConnection> connection);
+	bool reset_pwd(std::shared_ptr<HttpConnection> connection);
 	std::map<std::string,HttpHandler> _post_handlers;
 	std::map<std::string,HttpHandler> _get_handlers;
 

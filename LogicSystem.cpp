@@ -5,7 +5,7 @@ LogicSystem::LogicSystem()
 	RegGet("/test",std::bind(&LogicSystem::test,this,std::placeholders::_1));
 	RegPost("/get_verifycode", std::bind(&LogicSystem::get_verifycode, this, std::placeholders::_1));
 	RegPost("/user_register", std::bind(&LogicSystem::user_register, this, std::placeholders::_1));
-
+	RegPost("/reset_pwd", std::bind(&LogicSystem::reset_pwd, this, std::placeholders::_1));
 
 
 }
@@ -103,6 +103,48 @@ bool LogicSystem::user_register(std::shared_ptr<HttpConnection> connection)
 	re["email"] = email;
 	re["passwd"]=passwd;
 	re["verifycode"]=veriy_redis;
+	boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+	return true;
+}
+
+bool LogicSystem::reset_pwd(std::shared_ptr<HttpConnection> connection)
+{
+	std::string json_str=boost::beast::buffers_to_string(connection->_request.body().data());
+	connection->_response.set(boost::beast::http::field::content_type, "text/json");
+	Json::Value value;
+	Json::Reader reader;
+	reader.parse(json_str, value);
+	std::string verify_code;
+	Json::Value re;
+	bool get_redis_verify = RedisMgr::GetInstance()->Get("code_" + value["email"].asString(), verify_code);
+	if (!get_redis_verify)
+	{
+		re["error"]=ErrorCodes::VerifyExpired;
+		boost::beast::ostream(connection->_response.body())<<re.toStyledString();
+		return true;
+	}
+	if (value["verifycode"].asString() != verify_code)
+	{
+		re["error"]=ErrorCodes::VerifyCodeErr;
+		boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+		return true;
+	}
+	int check_user_id = MysqlMgr::GetInstance()->CheckEmail(value["name"].asString(), value["email"].asString());
+	if (check_user_id < 0)
+	{
+		re["error"] = ErrorCodes::UserError;
+		boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+		return true;
+	}
+	bool update_pwd=MysqlMgr::GetInstance()->UpdatePwd(value["email"].asString(), value["newpwd"].asString());
+	if (!update_pwd)
+	{
+		re["error"] = ErrorCodes::UserError;
+		boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+		return true;
+
+	}
+	re["error"] = ErrorCodes::Success;
 	boost::beast::ostream(connection->_response.body()) << re.toStyledString();
 	return true;
 }
