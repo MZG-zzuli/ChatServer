@@ -76,18 +76,22 @@ int MysqlDao::CheckEmail(const std::string& name, const std::string& email)
 {
     std::unique_ptr<MYSQL, std::function<void(MYSQL*)>> con(pool_->getConnection());
     std::string sql = "SELECT id FROM user where name='" + name + "' and email='" + email + "';";
-    if (!mysql_query(con.get(), sql.c_str()))
+    std::cout << sql << std::endl;
+    if (mysql_query(con.get(), sql.c_str()))
     {
+        std::cout<<1<<std::endl;
         return -1;
     }
     MYSQL_RES* res = mysql_store_result(con.get());
     if (!res)
     {
+        std::cout << 2 << std::endl;
         return -1;
     }
     MYSQL_ROW row = mysql_fetch_row(res);
     if (!row)
     {
+        std::cout << 3 << std::endl;
         return -1;
     }
     int uid = atoi(row[0]);

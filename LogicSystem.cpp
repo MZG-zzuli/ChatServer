@@ -109,6 +109,7 @@ bool LogicSystem::user_register(std::shared_ptr<HttpConnection> connection)
 
 bool LogicSystem::reset_pwd(std::shared_ptr<HttpConnection> connection)
 {
+	std::cout << "reset_code http" << std::endl;
 	std::string json_str=boost::beast::buffers_to_string(connection->_request.body().data());
 	connection->_response.set(boost::beast::http::field::content_type, "text/json");
 	Json::Value value;
