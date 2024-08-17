@@ -1,6 +1,6 @@
 #include "CServer.h"
 
-CServer::CServer(boost::asio::io_context& ioc, int port):_ioc(ioc),_accept(ioc,boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),port)),_sock(ioc)
+CServer::CServer(boost::asio::io_context& ioc, int port):_ioc(ioc),_accept(ioc,boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),port))
 {
 
 }
@@ -14,7 +14,7 @@ void CServer::start()
 			if (ec)
 			{
 				std::cerr << "Error accepting connection: " << ec.message() << std::endl;
-				self->start();
+				self->start(); 
 				return;
 			}
 			conn->start();

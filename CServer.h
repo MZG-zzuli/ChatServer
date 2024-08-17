@@ -14,7 +14,6 @@ public:
 
 private:
 	boost::asio::ip::tcp::acceptor _accept;
-	boost::asio::ip::tcp::socket _sock;
 
 	boost::asio::io_context& _ioc;
 
