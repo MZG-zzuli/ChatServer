@@ -12,6 +12,7 @@ class HttpConnection;
 #include"VerifyGrpcClient.h"
 #include"MysqlMgr.h"
 #include"RedisMgr.h"
+#include"StatusGrpcClient.h"
 typedef std::function<bool(std::shared_ptr<HttpConnection>)> HttpHandler;
 class LogicSystem:public Singleton<LogicSystem>
 {
@@ -29,6 +30,7 @@ private:
 	bool get_verifycode(std::shared_ptr<HttpConnection> connection);
 	bool user_register(std::shared_ptr<HttpConnection> connection);
 	bool reset_pwd(std::shared_ptr<HttpConnection> connection);
+	bool user_login(std::shared_ptr<HttpConnection> connectioon);
 	std::map<std::string,HttpHandler> _post_handlers;
 	std::map<std::string,HttpHandler> _get_handlers;
 

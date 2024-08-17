@@ -149,6 +149,8 @@
     <ClInclude Include="RedisMgr.h" />
     <ClInclude Include="RPConPool.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="StatusConPool.h" />
+    <ClInclude Include="StatusGrpcClient.h" />
     <ClInclude Include="VerifyGrpcClient.h" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +169,8 @@
     <ClCompile Include="RedisConPool.cpp" />
     <ClCompile Include="RedisMgr.cpp" />
     <ClCompile Include="RPConPool.cpp" />
+    <ClCompile Include="StatusConPool.cpp" />
+    <ClCompile Include="StatusGrpcClient.cpp" />
     <ClCompile Include="VerifyGrpcClient.cpp" />
   </ItemGroup>
   <ItemGroup>

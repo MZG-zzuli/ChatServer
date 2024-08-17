@@ -6,7 +6,7 @@ LogicSystem::LogicSystem()
 	RegPost("/get_verifycode", std::bind(&LogicSystem::get_verifycode, this, std::placeholders::_1));
 	RegPost("/user_register", std::bind(&LogicSystem::user_register, this, std::placeholders::_1));
 	RegPost("/reset_pwd", std::bind(&LogicSystem::reset_pwd, this, std::placeholders::_1));
-
+	RegPost("/user_login", std::bind(&LogicSystem::user_login, this, std::placeholders::_1));
 
 }
 bool LogicSystem::test(std::shared_ptr<HttpConnection> connection)
@@ -150,7 +150,56 @@ bool LogicSystem::reset_pwd(std::shared_ptr<HttpConnection> connection)
 	return true;
 }
 	
+bool LogicSystem::user_login(std::shared_ptr<HttpConnection> connection)
+{
+	std::cout << "user_login\n";
+	std::string json_str = boost::beast::buffers_to_string(connection->_request.body().data());
+	Json::Reader reader;
+	Json::Value value;
+	Json::Value re;
+	bool parse_success = reader.parse(json_str, value);
+	if (!parse_success)
+	{
+		re["error"] = ErrorCodes::Error_Json;
+		boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+		std::cout << "json error\n";
+		return true;
+	}
+	std::string email = value["email"].asString();
+	std::string passwd = value["passwd"].asString();
+	std::cout << email << ":" << passwd;
+	//------数据库验证-----
+	UserInfo user;
+	bool pwd_valid = MysqlMgr::GetInstance()->CheckPwd(email, passwd, user);
+	if (!pwd_valid)
+	{
+		re["error"] = ErrorCodes::PasswdErr;
+		boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+		std::cout << "password error\n";
+		return true;
+	}
 
+	//--------grpc获取合适服务器并返回
+	message::GetChatServerRsp reply = StatusGrpcClient::GetInstance()->GetChatServer(user.uid);
+	if (reply.error())
+	{
+		std::cout << "getChatServer error!" << std::endl;
+		re["error"] = ErrorCodes::RPCGetFailed;
+		std::string jsonstr = re.toStyledString();
+		boost::beast::ostream(connection->_response.body()) << jsonstr;
+		return true;
+	}
+	re["error"] = ErrorCodes::Success;
+	re["name"] = user.name;
+	re["uid"] = user.uid;
+	re["token"] = reply.token();
+	re["host"] = reply.host();
+	re["port"] = reply.port();
+	std::cout << re.toStyledString() << std::endl;
+	boost::beast::ostream(connection->_response.body()) << re.toStyledString();
+
+	return true;
+}
 
 
 LogicSystem::~LogicSystem()

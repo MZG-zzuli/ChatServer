@@ -1,8 +1,8 @@
-#include "RPConPool.h"
+#include "StatusConPool.h"
 
 
 
-RPConPool::RPConPool(size_t pool_size, const std::string& host, const std::string& port):
+StatusConPool::StatusConPool(size_t pool_size, const std::string& host, const std::string& port) :
 	pool_size(pool_size),
 	host_(host),
 	port_(port),
@@ -12,11 +12,11 @@ RPConPool::RPConPool(size_t pool_size, const std::string& host, const std::strin
 	for (size_t i = 0; i < pool_size; ++i)
 	{
 		std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(ip_port, grpc::InsecureChannelCredentials());
-		connections_.push(message::VerifyService::NewStub(channel));
+		connections_.push(message::StatusService::NewStub(channel));
 	}
 }
 
-RPConPool::~RPConPool()
+StatusConPool::~StatusConPool()
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	close();
@@ -26,7 +26,7 @@ RPConPool::~RPConPool()
 	}
 }
 
-std::unique_ptr<message::VerifyService::Stub> RPConPool::getConnection()
+std::unique_ptr<message::StatusService::Stub> StatusConPool::getConnection()
 {
 	std::unique_lock<std::mutex> lock(mutex_);
 	cond_.wait(lock, [this]()->bool {
@@ -36,21 +36,21 @@ std::unique_ptr<message::VerifyService::Stub> RPConPool::getConnection()
 		return !connections_.empty();
 		});
 	if (b_stop_)return nullptr;
-	std::unique_ptr<message::VerifyService::Stub> context = std::move(connections_.front());
+	std::unique_ptr<message::StatusService::Stub> context = std::move(connections_.front());
 	connections_.pop();
 	return context;
 
 
 }
 
-void RPConPool::returnConnection(std::unique_ptr<message::VerifyService::Stub>& context)
+void StatusConPool::returnConnection(std::unique_ptr<message::StatusService::Stub>& context)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	connections_.push(std::move(context));
 	cond_.notify_one();
 }
 
-void RPConPool::close()
+void StatusConPool::close()
 {
 	b_stop_ = true;
 	cond_.notify_all();

@@ -111,3 +111,49 @@ bool MysqlDao::UpdatePwd(const std::string& email, const std::string& newpwd)
     pool_->returnConnection(con);
     return true;
 }
+
+
+bool MysqlDao::CheckPwd(const std::string& email, const std::string& pwd, UserInfo& userInfo)
+{
+    std::unique_ptr<MYSQL, std::function<void(MYSQL*)>> con(pool_->getConnection());
+    std::string sql = "select * from user where email='" + email + "' and pwd='" + pwd + "';";
+    std::cout << sql;
+    if (mysql_query(con.get(), sql.c_str()))
+    {
+        
+        return false;
+    }
+    MYSQL_RES* res = mysql_store_result(con.get());
+    MYSQL_ROW  row = mysql_fetch_row(res);
+    if (row == NULL)
+    {
+        mysql_free_result(res);
+        pool_->returnConnection(con);
+        return false;
+    }
+
+    MYSQL_FIELD* fields = mysql_fetch_fields(res);
+    int num = mysql_num_fields(res);
+    for (int i = 0; i < num; i++)
+    {
+        if (strcmp(fields[i].name, "name")==0)
+        {
+            userInfo.name = row[i];
+        }
+        if (strcmp(fields[i].name, "email")==0)
+        {
+            userInfo.email = row[i];
+        }
+        if (strcmp(fields[i].name, "pwd") == 0)
+        {
+            userInfo.pwd = row[i];
+        }
+        if (strcmp(fields[i].name, "id") == 0)
+        {
+            userInfo.uid = atoi(row[i]);
+        }
+    }
+    mysql_free_result(res);
+    pool_->returnConnection(con);
+    return true;
+}
